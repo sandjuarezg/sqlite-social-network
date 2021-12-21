@@ -50,13 +50,21 @@ func ScanRspnsWithMsgPrint(msg string) (rspns string, err error) {
 //  @return1 <err error>:  error variable
 func ReviewSqlMigration() (err error) {
 	_, err = os.Stat("./migration.sql")
-	if os.IsNotExist(err) {
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return
+		}
+
 		err = errors.New("migration file not found")
 		return
 	}
 
 	_, err = os.Stat("./social-network.db")
-	if os.IsNotExist(err) {
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return
+		}
+
 		_, err = os.Create("./social-network.db")
 		if err != nil {
 			err = errors.New("error to create database")
@@ -64,22 +72,24 @@ func ReviewSqlMigration() (err error) {
 		}
 	}
 
-	content, err := os.ReadFile("./migration.sql")
-	if err != nil {
-		err = errors.New("error to read migration file")
-		return
-	}
-
-	fdb, err := sql.Open("sqlite3", "./social-network.db")
+	db, err := sql.Open("sqlite3", "./social-network.db")
 	if err != nil {
 		err = errors.New("error to open database")
 		return
 	}
-	defer fdb.Close()
+	defer db.Close()
 
-	_, err = fdb.Query("SELECT * from users")
+	_, err = db.Query("SELECT * FROM users, posts, friends, requests")
 	if err != nil {
-		_, err = fdb.Exec(string(content))
+		var content []byte
+
+		content, err = os.ReadFile("./migration.sql")
+		if err != nil {
+			err = errors.New("error to read migration file")
+			return
+		}
+
+		_, err = db.Exec(string(content))
 		if err != nil {
 			err = errors.New("error to execute migrations")
 		}
