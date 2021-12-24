@@ -12,6 +12,9 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// @var <db *sql.DB>: global database variable
+var DB *sql.DB
+
 // <CleanConsole>          clear console after 1 second
 //
 //  @return1 <err error>:  error variable
@@ -59,20 +62,20 @@ func ReviewSqlMigration() (err error) {
 		return
 	}
 
-	_, err = os.Stat("./social-network.db")
+	_, err = os.Stat("./social_network.db")
 	if err != nil {
 		if !os.IsNotExist(err) {
 			return
 		}
 
-		_, err = os.Create("./social-network.db")
+		_, err = os.Create("./social_network.db")
 		if err != nil {
 			err = errors.New("error to create database")
 			return
 		}
 	}
 
-	db, err := sql.Open("sqlite3", "./social-network.db")
+	db, err := sql.Open("sqlite3", "./social_network.db")
 	if err != nil {
 		err = errors.New("error to open database")
 		return
