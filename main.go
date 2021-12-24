@@ -1,9 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/sandjuarezg/sqlite-social-network/models"
 )
 
@@ -17,6 +21,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	models.DB, err = sql.Open("sqlite3", "./social_network.db?_foreign_keys=ON")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer models.DB.Close()
 
 	for !exit {
 
@@ -54,7 +64,7 @@ func main() {
 
 			var back bool
 
-			username, err := models.ScanRspnsWithMsgPrint("Enter username")
+			email, err := models.ScanRspnsWithMsgPrint("Enter email")
 			if err != nil {
 				log.Println(err)
 				continue
@@ -67,7 +77,7 @@ func main() {
 				continue
 			}
 
-			u, err := models.LogIn(username, passwd)
+			u, err := models.LogIn(email, passwd)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -122,13 +132,13 @@ func main() {
 						continue
 					}
 
+					back = true
+
 					err = u.DeleteAccount()
 					if err != nil {
 						log.Println(err)
 						continue
 					}
-
-					back = true
 
 					fmt.Println()
 					fmt.Println("Account deleted successfully")
@@ -152,17 +162,27 @@ func main() {
 
 				case 3:
 
-					username, err = models.ScanRspnsWithMsgPrint("Enter username")
+					username, err := models.ScanRspnsWithMsgPrint("Enter username to search")
 					if err != nil {
 						log.Println(err)
 						continue
 					}
 
-					id, err := models.GetUserIdByUsername(username)
+					us, err := models.GetSimilarUsersByUsername(username)
 					if err != nil {
 						log.Println(err)
 						continue
 					}
+
+					fmt.Println()
+					for _, v := range us {
+						fmt.Printf("%d. %s\n", v.Id, v.Username)
+					}
+
+					var id int
+					fmt.Println()
+					fmt.Println("Enter user id to add")
+					fmt.Scanln(&id)
 
 					err = models.SendFriendRequest(models.Request{Id_user_first: u.Id, Id_user_second: id})
 					if err != nil {
@@ -175,30 +195,30 @@ func main() {
 
 				case 4:
 
-					username, err = models.ScanRspnsWithMsgPrint("Enter username")
+					id, err := models.ScanRspnsWithMsgPrint("Enter id user to delete")
 					if err != nil {
 						log.Println(err)
 						continue
 					}
 
-					id, err := models.GetUserIdByUsername(username)
+					n, err := strconv.Atoi(id)
 					if err != nil {
 						log.Println(err)
 						continue
 					}
 
-					err = models.DeleteFriend(models.Friend{Id_user_first: u.Id, Id_user_second: id})
+					err = models.DeleteFriend(models.Friend{Id_user_first: u.Id, Id_user_second: n})
 					if err != nil {
 						log.Println(err)
 						continue
 					}
 
 					fmt.Println()
-					fmt.Printf("%s now isn't your friend\n", username)
+					fmt.Println("Friend deleted")
 
 				case 5:
 
-					posts, err := models.GetPostsByUserName(u.Username)
+					posts, err := models.GetPostsByUserId(u.Id)
 					if err != nil {
 						log.Println(err)
 						continue
@@ -209,16 +229,19 @@ func main() {
 						continue
 					}
 
+					fmt.Println("Your posts")
+					fmt.Println()
 					for _, v := range posts {
-						fmt.Printf("%d. %s\n", v.Id, v.Text)
+						fmt.Printf("%s - %s\n", v.Date, v.Text)
 					}
 
+					fmt.Println()
 					fmt.Println("Press ENTER to continue")
 					fmt.Scanln()
 
 				case 6:
 
-					friends, err := models.GetFriendsByUsername(u.Username)
+					friends, err := models.GetFriendsByIdUser(u.Id)
 					if err != nil {
 						log.Println(err)
 						continue
@@ -230,7 +253,7 @@ func main() {
 					}
 
 					for _, v := range friends {
-						username, err = models.GetUsernameByUserId(v.Id_user_second)
+						username, err := models.GetUsernameByUserId(v.Id_user_first)
 						if err != nil {
 							log.Println(err)
 							return
@@ -245,7 +268,7 @@ func main() {
 
 				case 7:
 
-					requests, err := models.GetRequestsByUserName(u.Username)
+					requests, err := models.GetRequestsByIdUser(u.Id)
 					if err != nil {
 						log.Println(err)
 						continue
@@ -258,13 +281,13 @@ func main() {
 
 					fmt.Println("Enter id of user")
 					for _, v := range requests {
-						username, err = models.GetUsernameByUserId(v.Id_user_second)
+						username, err := models.GetUsernameByUserId(v.Id_user_first)
 						if err != nil {
 							log.Println(err)
 							return
 						}
 
-						fmt.Printf("%d. %s\n", v.Id_user_second, username)
+						fmt.Printf("%d. %s\n", v.Id_user_first, username)
 					}
 					fmt.Scanln(&opc)
 
@@ -291,6 +314,18 @@ func main() {
 
 		case 2:
 
+			email, err := models.ScanRspnsWithMsgPrint("Enter email")
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+
+			if !strings.Contains(email, "@") {
+				log.Println("it isn't an email address")
+				continue
+			}
+
+			fmt.Println()
 			username, err := models.ScanRspnsWithMsgPrint("Enter username")
 			if err != nil {
 				log.Println(err)
@@ -304,7 +339,7 @@ func main() {
 				continue
 			}
 
-			err = models.AddUser(models.User{Username: username, Passwd: passwd})
+			err = models.AddUser(models.User{Email: email, Username: username, Passwd: passwd})
 			if err != nil {
 				log.Println(err)
 				continue
