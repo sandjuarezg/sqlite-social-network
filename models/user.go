@@ -20,13 +20,7 @@ type User struct {
 
 //  @return1 (err error): error variable
 func AddUser(u User) (err error) {
-	smt, err := DB.Prepare("INSERT INTO users (email, username, passwd) VALUES (?, ?, ?)")
-	if err != nil {
-		return
-	}
-	defer smt.Close()
-
-	_, err = smt.Exec(u.Email, u.Username, u.Passwd)
+	_, err = DB.Exec("INSERT INTO users (email, username, passwd) VALUES (?, ?, ?)", u.Email, u.Username, u.Passwd)
 	if err != nil {
 		err = errors.New("error: probably email already use")
 		return
