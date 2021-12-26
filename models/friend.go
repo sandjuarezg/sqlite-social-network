@@ -8,9 +8,9 @@ import (
 
 // Friend: structure for friends
 type Friend struct {
-	Id_user_first  int       // id of first user
-	Id_user_second int       // id of second user
-	Date           time.Time // friendship start date
+	IDUserFirst  int       // id of first user
+	IDUserSecond int       // id of second user
+	Date         time.Time // friendship start date
 }
 
 // AddFriend: add friendship in the "friends" table
@@ -18,30 +18,24 @@ type Friend struct {
 //
 //  @return1 (err error): error variable
 func AddFriend(frds Friend) (err error) {
-	if frds.Id_user_first == frds.Id_user_second {
+	if frds.IDUserFirst == frds.IDUserSecond {
 		err = errors.New("that's your id user")
 		return
 	}
 
-	if frds.Id_user_first > frds.Id_user_second {
-		aux := frds.Id_user_first
-		frds.Id_user_first = frds.Id_user_second
-		frds.Id_user_second = aux
+	if frds.IDUserFirst > frds.IDUserSecond {
+		aux := frds.IDUserFirst
+		frds.IDUserFirst = frds.IDUserSecond
+		frds.IDUserSecond = aux
 	}
 
-	row := DB.QueryRow("SELECT * FROM friends WHERE id_user_first = ? AND id_user_second = ?", frds.Id_user_first, frds.Id_user_second)
-	if row.Scan().Error() != sql.ErrNoRows.Error() {
+	row := DB.QueryRow("SELECT IDUserFirst FROM friends WHERE id_user_first = ? AND id_user_second = ?", frds.IDUserFirst, frds.IDUserSecond)
+	if row.Scan() != sql.ErrNoRows {
 		err = errors.New("they're already friends")
 		return
 	}
 
-	smt, err := DB.Prepare("INSERT INTO friends (id_user_first, id_user_second, date) VALUES (?, ?, ?)")
-	if err != nil {
-		return
-	}
-	defer smt.Close()
-
-	_, err = smt.Exec(frds.Id_user_first, frds.Id_user_second, time.Now().Format(time.RFC3339))
+	_, err = DB.Exec("INSERT INTO friends (id_user_first, id_user_second, date) VALUES (?, ?, ?)", frds.IDUserFirst, frds.IDUserSecond, time.Now().Format(time.RFC3339))
 	if err != nil {
 		return
 	}
@@ -54,18 +48,18 @@ func AddFriend(frds Friend) (err error) {
 //
 //  @return1 (err error): error variable
 func DeleteFriend(frds Friend) (err error) {
-	if frds.Id_user_first == frds.Id_user_second {
+	if frds.IDUserFirst == frds.IDUserSecond {
 		err = errors.New("that's your id user")
 		return
 	}
 
-	if frds.Id_user_first > frds.Id_user_second {
-		aux := frds.Id_user_first
-		frds.Id_user_first = frds.Id_user_second
-		frds.Id_user_second = aux
+	if frds.IDUserFirst > frds.IDUserSecond {
+		aux := frds.IDUserFirst
+		frds.IDUserFirst = frds.IDUserSecond
+		frds.IDUserSecond = aux
 	}
 
-	row, err := DB.Exec("DELETE from friends WHERE id_user_first = ? and id_user_second = ?", frds.Id_user_first, frds.Id_user_second)
+	row, err := DB.Exec("DELETE from friends WHERE id_user_first = ? and id_user_second = ?", frds.IDUserFirst, frds.IDUserSecond)
 	if err != nil {
 		return
 	}
@@ -119,7 +113,7 @@ func GetFriendsByIdUser(id int) (frds []Friend, err error) {
 	)
 
 	for rows.Next() {
-		err = rows.Scan(&content, &aux.Id_user_first)
+		err = rows.Scan(&content, &aux.IDUserFirst)
 		if err != nil {
 			return
 		}
