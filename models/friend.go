@@ -6,20 +6,17 @@ import (
 	"time"
 )
 
-// <Friend> structure for friends
-//  @atr1 <Id_user_first  int>: 	  id of first user
-//  @atr2 <Id_user_second int>: 	  id of second user
-//  @atr3 <Date           time.Time>: friendship start date
+// Friend: structure for friends
 type Friend struct {
-	Id_user_first  int
-	Id_user_second int
-	Date           time.Time
+	Id_user_first  int       // id of first user
+	Id_user_second int       // id of second user
+	Date           time.Time // friendship start date
 }
 
-// <AddFriend>     		   add friendship in the "friends" table
-//  @param1 <frds Friend>: structure variable "Friend"
+// AddFriend: add friendship in the "friends" table
+//  @param1 (frds Friend): structure variable "Friend"
 //
-//  @return1 <err error>:  error variable
+//  @return1 (err error): error variable
 func AddFriend(frds Friend) (err error) {
 	if frds.Id_user_first == frds.Id_user_second {
 		err = errors.New("that's your id user")
@@ -52,10 +49,10 @@ func AddFriend(frds Friend) (err error) {
 	return
 }
 
-// <DeleteFriend>          delete friendship of the "friends" table
-//  @param1 <frds Friend>: structure variable "Friend"
+// DeleteFriend: delete friendship of the "friends" table
+//  @param1 (frds Friend): structure variable "Friend"
 //
-//  @return1 <err error>:  error variable
+//  @return1 (err error): error variable
 func DeleteFriend(frds Friend) (err error) {
 	if frds.Id_user_first == frds.Id_user_second {
 		err = errors.New("that's your id user")
@@ -86,11 +83,11 @@ func DeleteFriend(frds Friend) (err error) {
 	return
 }
 
-// <GetFriendsByIdUser>  	  get friends of user
-//  @param1 <id int>: 	      id of user
+// GetFriendsByIdUser: get friends of user
+//  @param1 (id int): id of user
 //
-//  @return1 <frds []Friend>: friends slice
-//  @return2 <err error>:  	  error variable
+//  @return1 (frds []Friend): friends slice
+//  @return2 (err error): error variable
 func GetFriendsByIdUser(id int) (frds []Friend, err error) {
 	query := `
 	SELECT 
