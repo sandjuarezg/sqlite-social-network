@@ -8,10 +8,10 @@ import (
 
 // Post: structure for posts
 type Post struct {
-	Id      int       // id of post
-	Id_user int       // id of user
-	Text    string    // text of post
-	Date    time.Time // date of post
+	Id     int       // id of post
+	IDUser int       // id of user
+	Text   string    // text of post
+	Date   time.Time // date of post
 }
 
 // AddPost: add post of the "posts" table
@@ -19,13 +19,7 @@ type Post struct {
 //
 //  @return1 (err error): error variable
 func AddPost(p Post) (err error) {
-	smt, err := DB.Prepare("INSERT INTO posts (id_user, text, date) VALUES (?, ?, ?)")
-	if err != nil {
-		return
-	}
-	defer smt.Close()
-
-	_, err = smt.Exec(p.Id_user, p.Text, time.Now().Format(time.RFC3339))
+	_, err = DB.Exec("INSERT INTO posts (id_user, text, date) VALUES (?, ?, ?)", p.IDUser, p.Text, time.Now().Format(time.RFC3339))
 	if err != nil {
 		return
 	}
