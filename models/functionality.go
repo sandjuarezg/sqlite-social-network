@@ -12,12 +12,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// @var <db *sql.DB>: global database variable
+// global database variable
 var DB *sql.DB
 
-// <CleanConsole>          clear console after 1 second
+// CleanConsole: clear console after 1 second
 //
-//  @return1 <err error>:  error variable
+//  @return1 (err error): error variable
 func CleanConsole() (err error) {
 	time.Sleep(1 * time.Second)
 
@@ -32,12 +32,12 @@ func CleanConsole() (err error) {
 	return
 }
 
-// <ScanRspnsWithMsgPrint>   print message and scan response
-//  @param1 <msg string>: 	 message to display by console
+// PrintMessageWithResponseScan: print message and scan response
+//  @param1 (msg string): message to display by console
 //
-//  @return1 <rspns string>: response of user
-//  @return2 <err error>:    error variable
-func ScanRspnsWithMsgPrint(msg string) (rspns string, err error) {
+//  @return1 (rspns string): response of user
+//  @return2 (err error): error variable
+func PrintMessageWithResponseScan(msg string) (rspns string, err error) {
 	fmt.Println(msg)
 	aux, _, err := bufio.NewReader(os.Stdin).ReadLine()
 	if err != nil {
@@ -48,10 +48,10 @@ func ScanRspnsWithMsgPrint(msg string) (rspns string, err error) {
 	return
 }
 
-// <ReviewSqlMigration>    migration review
+// ReviewSqlMigration: migration review
 //
-//  @return1 <err error>:  error variable
-func ReviewSqlMigration() (err error) {
+//  @return1 (err):  error variable
+func ReviewSQLMigration() (err error) {
 	_, err = os.Stat("./migration.sql")
 	if err != nil {
 		if !os.IsNotExist(err) {
