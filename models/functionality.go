@@ -82,7 +82,7 @@ func ReviewSQLMigration() (err error) {
 	}
 	defer db.Close()
 
-	_, err = db.Query("SELECT * FROM users, posts, friends, requests")
+	_, err = db.Query("SELECT users.id, posts.id, friends.id_user_first, requests.id_user_first FROM users, posts, friends, requests")
 	if err != nil {
 		var content []byte
 
