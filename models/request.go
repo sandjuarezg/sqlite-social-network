@@ -5,18 +5,16 @@ import (
 	"errors"
 )
 
-// <Request> structure for requests
-//  @atr1 <Id_user_first  int>: id of user who sent the request
-//  @atr2 <Id_user_second int>: id of user who receives the request
+// Request: structure for requests
 type Request struct {
-	Id_user_first  int
-	Id_user_second int
+	Id_user_first  int // id of user who sent the request
+	Id_user_second int // id of user who receives the request
 }
 
-// <SendFriendRequest>     register friend requests in the "request" table
-//  @param1 <req Request>: structure variable "Request"
+// SendFriendRequest: register friend requests in the "request" table
+//  @param1 (req Request): structure variable "Request"
 //
-//  @return1 <err error>:  error variable
+//  @return1 (err error): error variable
 func SendFriendRequest(req Request) (err error) {
 	if req.Id_user_first == req.Id_user_second {
 		err = errors.New("that's your id user")
@@ -43,11 +41,11 @@ func SendFriendRequest(req Request) (err error) {
 	return
 }
 
-// <AnswerRequest> 		   add friend or delete the request
-//  @param1 <req Request>: structure variable "Request"
-//  @param2 <answ bool>:   answer of request true|false
+// AnswerRequest: add friend or delete the request
+//  @param1 (req Request): structure variable "Request"
+//  @param2 (answ bool): answer of request true|false
 //
-//  @return1 <err error>:  error variable
+//  @return1 (err error): error variable
 func AnswerRequest(req Request, answ bool) (err error) {
 	row, err := DB.Exec("DELETE from requests WHERE id_user_first = ? AND id_user_second = ?", req.Id_user_second, req.Id_user_first)
 	if err != nil {
@@ -76,11 +74,11 @@ func AnswerRequest(req Request, answ bool) (err error) {
 	return
 }
 
-// <GetRequestsByIdUser>      get requests of user
-//  @param1 <id int>:         id of user
+// GetRequestsByIdUser: get requests of user
+//  @param1 (id int): id of user
 //
-//  @return1 <req []Request>: request slice
-//  @return2 <err error>:     error variable
+//  @return1 (req []Request): request slice
+//  @return2 (err error): error variable
 func GetRequestsByIdUser(id int) (req []Request, err error) {
 	query := `
 	SELECT 
