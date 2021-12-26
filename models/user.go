@@ -7,22 +7,18 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// <User> structure for User
-//  @atr1 <Id       int>: 	 id of user
-//  @atr2 <Email    string>: email of user
-//  @atr3 <Username string>: username of user
-//  @atr4 <Passwd   string>: password of user
+// User: structure for User
 type User struct {
-	Id       int
-	Email    string
-	Username string
-	Passwd   string
+	Id       int    // id of user
+	Email    string // email of user
+	Username string // username of user
+	Passwd   string // password of user
 }
 
-// <AddUser>              add user of the "users" table
-//  @param1 <u User>:     structure variable "User"
+// AddUser: add user of the "users" table
+//  @param1 (u User): structure variable "User"
 
-//  @return1 <err error>: error variable
+//  @return1 (err error): error variable
 func AddUser(u User) (err error) {
 	smt, err := DB.Prepare("INSERT INTO users (email, username, passwd) VALUES (?, ?, ?)")
 	if err != nil {
@@ -39,12 +35,12 @@ func AddUser(u User) (err error) {
 	return
 }
 
-// <LogIn>          		 user login
-//  @param1 <email  string>: email of user
-//  @param2 <passwd string>: password of user
+// LogIn: user login
+//  @param1 (email  string): email of user
+//  @param2 (passwd string): password of user
 //
-//  @return1 <u User>   :    structure variable "User"
-//  @return2 <err error>:    error variable
+//  @return1 (u User): structure variable "User"
+//  @return2 (err error): error variable
 func LogIn(email, passwd string) (u User, err error) {
 	row := DB.QueryRow("SELECT id, email, username, passwd FROM users WHERE email = ? AND passwd = ?", email, passwd)
 	err = row.Scan(&u.Id, &u.Email, &u.Username, &u.Passwd)
@@ -56,10 +52,10 @@ func LogIn(email, passwd string) (u User, err error) {
 	return
 }
 
-// <DeleteAccount>         delete account of user
-//  @rcvr1 <u User>:	   structure variable "User"
+// DeleteAccount: delete account of user
+//  @rcvr1 (u User): structure variable "User"
 //
-//  @return1 <err error>:  error variable
+//  @return1 (err error): error variable
 func (u User) DeleteAccount() (err error) {
 	row, err := DB.Exec("DELETE from users WHERE id = ?", u.Id)
 	if err != nil {
@@ -79,11 +75,11 @@ func (u User) DeleteAccount() (err error) {
 	return
 }
 
-// <GetSimilarUsersByUsername> get similar usernames by username
-//  @param1 <username string>: username
+// GetSimilarUsersByUsername: get similar usernames by username
+//  @param1 (username string): username
 //
-//  @return1 <u []User>: 	   user slice
-//  @return2 <err error>:  	   error variable
+//  @return1 (u []User): user slice
+//  @return2 (err error): error variable
 func GetSimilarUsersByUsername(username string) (u []User, err error) {
 	rows, err := DB.Query("SELECT id, username FROM users WHERE username LIKE ? ORDER BY id", fmt.Sprintf("%%%s%%", username))
 	if err != nil {
@@ -105,11 +101,11 @@ func GetSimilarUsersByUsername(username string) (u []User, err error) {
 	return
 }
 
-// <GetUsernameByUserId>  	    get username by id
-//  @param1 <id int>: 		    user id
+// GetUsernameByUserId: get username by id
+//  @param1 (id int): user id
 //
-//  @return1 <username string>: username
-//  @return2 <err error>:  	    error variable
+//  @return1 (username string): username
+//  @return2 (err error): error variable
 func GetUsernameByUserId(id int) (username string, err error) {
 	row := DB.QueryRow("SELECT username FROM users WHERE id = ?", id)
 	err = row.Scan(&username)
