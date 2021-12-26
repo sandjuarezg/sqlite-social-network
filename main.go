@@ -11,13 +11,8 @@ import (
 	"github.com/sandjuarezg/sqlite-social-network/models"
 )
 
-func main() {
-	var (
-		opc  int
-		exit bool
-	)
-
-	err := models.ReviewSqlMigration()
+func init() {
+	err := models.ReviewSQLMigration()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -26,7 +21,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func main() {
 	defer models.DB.Close()
+
+	var (
+		opc  int
+		exit bool
+	)
 
 	for !exit {
 
@@ -64,14 +67,14 @@ func main() {
 
 			var back bool
 
-			email, err := models.ScanRspnsWithMsgPrint("Enter email")
+			email, err := models.PrintMessageWithResponseScan("Enter email")
 			if err != nil {
 				log.Println(err)
 				continue
 			}
 
 			fmt.Println()
-			passwd, err := models.ScanRspnsWithMsgPrint("Enter password")
+			passwd, err := models.PrintMessageWithResponseScan("Enter password")
 			if err != nil {
 				log.Println(err)
 				continue
@@ -145,13 +148,13 @@ func main() {
 
 				case 2:
 
-					text, err := models.ScanRspnsWithMsgPrint("Enter post text")
+					text, err := models.PrintMessageWithResponseScan("Enter post text")
 					if err != nil {
 						log.Println(err)
 						continue
 					}
 
-					err = models.AddPost(models.Post{Id_user: u.Id, Text: text})
+					err = models.AddPost(models.Post{IDUser: u.Id, Text: text})
 					if err != nil {
 						log.Println(err)
 						continue
@@ -162,7 +165,7 @@ func main() {
 
 				case 3:
 
-					username, err := models.ScanRspnsWithMsgPrint("Enter username to search")
+					username, err := models.PrintMessageWithResponseScan("Enter username to search")
 					if err != nil {
 						log.Println(err)
 						continue
@@ -184,7 +187,7 @@ func main() {
 					fmt.Println("Enter user id to add")
 					fmt.Scanln(&id)
 
-					err = models.SendFriendRequest(models.Request{Id_user_first: u.Id, Id_user_second: id})
+					err = models.SendFriendRequest(models.Request{IDUserFirst: u.Id, IDUserSecond: id})
 					if err != nil {
 						log.Println(err)
 						continue
@@ -195,7 +198,7 @@ func main() {
 
 				case 4:
 
-					id, err := models.ScanRspnsWithMsgPrint("Enter id user to delete")
+					id, err := models.PrintMessageWithResponseScan("Enter id user to delete")
 					if err != nil {
 						log.Println(err)
 						continue
@@ -207,7 +210,7 @@ func main() {
 						continue
 					}
 
-					err = models.DeleteFriend(models.Friend{Id_user_first: u.Id, Id_user_second: n})
+					err = models.DeleteFriend(models.Friend{IDUserFirst: u.Id, IDUserSecond: n})
 					if err != nil {
 						log.Println(err)
 						continue
@@ -253,7 +256,7 @@ func main() {
 					}
 
 					for _, v := range friends {
-						username, err := models.GetUsernameByUserId(v.Id_user_first)
+						username, err := models.GetUsernameByUserId(v.IDUserFirst)
 						if err != nil {
 							log.Println(err)
 							return
@@ -281,13 +284,13 @@ func main() {
 
 					fmt.Println("Enter id of user")
 					for _, v := range requests {
-						username, err := models.GetUsernameByUserId(v.Id_user_first)
+						username, err := models.GetUsernameByUserId(v.IDUserFirst)
 						if err != nil {
 							log.Println(err)
 							return
 						}
 
-						fmt.Printf("%d. %s\n", v.Id_user_first, username)
+						fmt.Printf("%d. %s\n", v.IDUserFirst, username)
 					}
 					fmt.Scanln(&opc)
 
@@ -303,7 +306,7 @@ func main() {
 						ban = true
 					}
 
-					err = models.AnswerRequest(models.Request{Id_user_first: u.Id, Id_user_second: opc}, ban)
+					err = models.AnswerRequest(models.Request{IDUserFirst: u.Id, IDUserSecond: opc}, ban)
 					if err != nil {
 						log.Println(err)
 						continue
@@ -314,7 +317,7 @@ func main() {
 
 		case 2:
 
-			email, err := models.ScanRspnsWithMsgPrint("Enter email")
+			email, err := models.PrintMessageWithResponseScan("Enter email")
 			if err != nil {
 				log.Println(err)
 				continue
@@ -326,14 +329,14 @@ func main() {
 			}
 
 			fmt.Println()
-			username, err := models.ScanRspnsWithMsgPrint("Enter username")
+			username, err := models.PrintMessageWithResponseScan("Enter username")
 			if err != nil {
 				log.Println(err)
 				continue
 			}
 
 			fmt.Println()
-			passwd, err := models.ScanRspnsWithMsgPrint("Enter password")
+			passwd, err := models.PrintMessageWithResponseScan("Enter password")
 			if err != nil {
 				log.Println(err)
 				continue
