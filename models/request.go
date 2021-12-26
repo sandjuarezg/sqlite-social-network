@@ -7,8 +7,8 @@ import (
 
 // Request: structure for requests
 type Request struct {
-	Id_user_first  int // id of user who sent the request
-	Id_user_second int // id of user who receives the request
+	IDUserFirst  int // id of user who sent the request
+	IDUserSecond int // id of user who receives the request
 }
 
 // SendFriendRequest: register friend requests in the "request" table
@@ -16,24 +16,18 @@ type Request struct {
 //
 //  @return1 (err error): error variable
 func SendFriendRequest(req Request) (err error) {
-	if req.Id_user_first == req.Id_user_second {
+	if req.IDUserFirst == req.IDUserSecond {
 		err = errors.New("that's your id user")
 		return
 	}
 
-	row := DB.QueryRow("SELECT * FROM requests WHERE id_user_first = ? AND id_user_second = ?", req.Id_user_first, req.Id_user_second)
-	if row.Scan().Error() != sql.ErrNoRows.Error() {
+	row := DB.QueryRow("SELECT IDUserFirst FROM requests WHERE id_user_first = ? AND id_user_second = ?", req.IDUserFirst, req.IDUserSecond)
+	if row.Scan() != sql.ErrNoRows {
 		err = errors.New("this request has already been sent")
 		return
 	}
 
-	smt, err := DB.Prepare("INSERT INTO requests (id_user_first, id_user_second) VALUES (?, ?)")
-	if err != nil {
-		return
-	}
-	defer smt.Close()
-
-	_, err = smt.Exec(req.Id_user_first, req.Id_user_second)
+	_, err = DB.Exec("INSERT INTO requests (id_user_first, id_user_second) VALUES (?, ?)", req.IDUserFirst, req.IDUserSecond)
 	if err != nil {
 		return
 	}
@@ -47,7 +41,7 @@ func SendFriendRequest(req Request) (err error) {
 //
 //  @return1 (err error): error variable
 func AnswerRequest(req Request, answ bool) (err error) {
-	row, err := DB.Exec("DELETE from requests WHERE id_user_first = ? AND id_user_second = ?", req.Id_user_second, req.Id_user_first)
+	row, err := DB.Exec("DELETE from requests WHERE id_user_first = ? AND id_user_second = ?", req.IDUserSecond, req.IDUserFirst)
 	if err != nil {
 		return
 	}
@@ -66,7 +60,7 @@ func AnswerRequest(req Request, answ bool) (err error) {
 		return
 	}
 
-	err = AddFriend(Friend{Id_user_first: req.Id_user_first, Id_user_second: req.Id_user_second})
+	err = AddFriend(Friend{IDUserFirst: req.IDUserFirst, IDUserSecond: req.IDUserSecond})
 	if err != nil {
 		return
 	}
@@ -99,7 +93,7 @@ func GetRequestsByIdUser(id int) (req []Request, err error) {
 	var aux Request
 
 	for rows.Next() {
-		err = rows.Scan(&aux.Id_user_first)
+		err = rows.Scan(&aux.IDUserFirst)
 		if err != nil {
 			return
 		}
