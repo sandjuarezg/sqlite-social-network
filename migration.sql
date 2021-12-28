@@ -8,36 +8,36 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS posts (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    id_user INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
     text TEXT NOT NULL,
 	date TEXT NOT NULL,
 
-    FOREIGN KEY (id_user) 
+    FOREIGN KEY (user_id) 
         REFERENCES users (id)
         ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS friends (
-    id_user_first INTEGER NOT NULL,
-	id_user_second INTEGER NOT NULL,
+    user_id_first INTEGER NOT NULL,
+	user_id_second INTEGER NOT NULL,
 	date TEXT NOT NULL,
 
-    FOREIGN KEY (id_user_first) 
+    FOREIGN KEY (user_id_first) 
         REFERENCES users (id)
         ON DELETE CASCADE, 
-    FOREIGN KEY (id_user_second) 
+    FOREIGN KEY (user_id_second) 
         REFERENCES users (id)  
         ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS requests (
-    id_user_first INTEGER NOT NULL,
-	id_user_second INTEGER NOT NULL, 
+    user_id_first INTEGER NOT NULL,
+	user_id_second INTEGER NOT NULL, 
 
-    FOREIGN KEY (id_user_first) 
+    FOREIGN KEY (user_id_first) 
         REFERENCES users (id)
         ON DELETE CASCADE,
-    FOREIGN KEY (id_user_second) 
+    FOREIGN KEY (user_id_second) 
         REFERENCES users (id)
         ON DELETE CASCADE   
 );
