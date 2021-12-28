@@ -5,14 +5,14 @@ import (
 	"errors"
 )
 
-// Request: structure for requests
+// Request structure for requests
 type Request struct {
 	IDUserFirst  int // id of user who sent the request
 	IDUserSecond int // id of user who receives the request
 }
 
-// SendFriendRequest: register friend requests in the "request" table
-//  @param1 (req Request): structure variable "Request"
+// SendFriendRequest register friend requests in the "request" table
+//  @param1 (req): structure variable "Request"
 //
 //  @return1 (err error): error variable
 func SendFriendRequest(req Request) (err error) {
@@ -21,27 +21,49 @@ func SendFriendRequest(req Request) (err error) {
 		return
 	}
 
-	row := DB.QueryRow("SELECT IDUserFirst FROM requests WHERE id_user_first = ? AND id_user_second = ?", req.IDUserFirst, req.IDUserSecond)
+	query := `
+	SELECT 
+		user_id_first 
+		FROM 
+			friends 
+		WHERE 
+			(user_id_first = ? AND user_id_second = ?) OR (user_id_second = ? AND user_id_first = ?)`
+
+	row := DB.QueryRow(query, req.IDUserFirst, req.IDUserSecond, req.IDUserFirst, req.IDUserSecond)
+	if row.Scan() != sql.ErrNoRows {
+		err = errors.New("they're already friends")
+		return
+	}
+
+	row = DB.QueryRow("SELECT user_id_first FROM requests WHERE user_id_first = ? AND user_id_second = ?", req.IDUserFirst, req.IDUserSecond)
 	if row.Scan() != sql.ErrNoRows {
 		err = errors.New("this request has already been sent")
 		return
 	}
 
-	_, err = DB.Exec("INSERT INTO requests (id_user_first, id_user_second) VALUES (?, ?)", req.IDUserFirst, req.IDUserSecond)
+	_, err = DB.Exec("INSERT INTO requests (user_id_first, user_id_second) VALUES (?, ?)", req.IDUserFirst, req.IDUserSecond)
 	if err != nil {
+		err = errors.New("error: probably user not found")
 		return
 	}
 
 	return
 }
 
-// AnswerRequest: add friend or delete the request
-//  @param1 (req Request): structure variable "Request"
-//  @param2 (answ bool): answer of request true|false
+// AnswerRequest add friend or delete the request
+//  @param1 (req): structure variable "Request"
+//  @param2 (answ): answer of request true|false
 //
 //  @return1 (err error): error variable
 func AnswerRequest(req Request, answ bool) (err error) {
-	row, err := DB.Exec("DELETE from requests WHERE id_user_first = ? AND id_user_second = ?", req.IDUserSecond, req.IDUserFirst)
+	query := `
+	DELETE  
+		FROM 
+			requests 
+		WHERE 
+			(user_id_first = ? AND user_id_second = ?) OR (user_id_second = ? AND user_id_first = ?)`
+
+	row, err := DB.Exec(query, req.IDUserSecond, req.IDUserFirst, req.IDUserSecond, req.IDUserFirst)
 	if err != nil {
 		return
 	}
@@ -52,7 +74,7 @@ func AnswerRequest(req Request, answ bool) (err error) {
 	}
 
 	if n == 0 {
-		err = errors.New("that user doesn't exist")
+		err = errors.New("that user isn't your friend")
 		return
 	}
 
@@ -68,23 +90,13 @@ func AnswerRequest(req Request, answ bool) (err error) {
 	return
 }
 
-// GetRequestsByIdUser: get requests of user
-//  @param1 (id int): id of user
+// GetRequestsByIDUser get requests of user
+//  @param1 (id): id of user
 //
 //  @return1 (req []Request): request slice
 //  @return2 (err error): error variable
-func GetRequestsByIdUser(id int) (req []Request, err error) {
-	query := `
-	SELECT 
-		requests.id_user_first
-		FROM 
-			requests
-		JOIN users ON users.id = requests.id_user_second
-		WHERE 
-			requests.id_user_second = ?
-	`
-
-	rows, err := DB.Query(query, id)
+func GetRequestsByIDUser(id int) (req []Request, err error) {
+	rows, err := DB.Query("SELECT user_id_first FROM requests WHERE user_id_second = ?", id)
 	if err != nil {
 		return
 	}
