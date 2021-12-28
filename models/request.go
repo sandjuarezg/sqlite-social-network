@@ -14,22 +14,22 @@ type Request struct {
 // SendFriendRequest register friend requests in the "request" table
 //  @param1 (req): structure variable "Request"
 //
-//  @return1 (err error): error variable
+//  @return1 (err): error variable
 func SendFriendRequest(req Request) (err error) {
 	if req.IDUserFirst == req.IDUserSecond {
 		err = errors.New("that's your id user")
 		return
 	}
 
-	query := `
+	row := DB.QueryRow(`
 	SELECT 
 		user_id_first 
 		FROM 
 			friends 
 		WHERE 
-			(user_id_first = ? AND user_id_second = ?) OR (user_id_second = ? AND user_id_first = ?)`
+			(user_id_first = ? AND user_id_second = ?) OR (user_id_second = ? AND user_id_first = ?)
+	`, req.IDUserFirst, req.IDUserSecond, req.IDUserFirst, req.IDUserSecond)
 
-	row := DB.QueryRow(query, req.IDUserFirst, req.IDUserSecond, req.IDUserFirst, req.IDUserSecond)
 	if row.Scan() != sql.ErrNoRows {
 		err = errors.New("they're already friends")
 		return
@@ -54,16 +54,15 @@ func SendFriendRequest(req Request) (err error) {
 //  @param1 (req): structure variable "Request"
 //  @param2 (answ): answer of request true|false
 //
-//  @return1 (err error): error variable
+//  @return1 (err): error variable
 func AnswerRequest(req Request, answ bool) (err error) {
-	query := `
+	row, err := DB.Exec(`
 	DELETE  
 		FROM 
 			requests 
 		WHERE 
-			(user_id_first = ? AND user_id_second = ?) OR (user_id_second = ? AND user_id_first = ?)`
-
-	row, err := DB.Exec(query, req.IDUserSecond, req.IDUserFirst, req.IDUserSecond, req.IDUserFirst)
+			(user_id_first = ? AND user_id_second = ?) OR (user_id_second = ? AND user_id_first = ?)
+	`, req.IDUserSecond, req.IDUserFirst, req.IDUserSecond, req.IDUserFirst)
 	if err != nil {
 		return
 	}
@@ -93,8 +92,8 @@ func AnswerRequest(req Request, answ bool) (err error) {
 // GetRequestsByIDUser get requests of user
 //  @param1 (id): id of user
 //
-//  @return1 (req []Request): request slice
-//  @return2 (err error): error variable
+//  @return1 (req): request slice
+//  @return2 (err): error variable
 func GetRequestsByIDUser(id int) (req []Request, err error) {
 	rows, err := DB.Query("SELECT user_id_first FROM requests WHERE user_id_second = ?", id)
 	if err != nil {

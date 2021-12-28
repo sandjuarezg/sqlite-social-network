@@ -16,22 +16,22 @@ type Friend struct {
 // AddFriend add friendship in the "friends" table
 //  @param1 (frds): structure variable "Friend"
 //
-//  @return1 (err error): error variable
+//  @return1 (err): error variable
 func AddFriend(frds Friend) (err error) {
 	if frds.IDUserFirst == frds.IDUserSecond {
 		err = errors.New("that's your id user")
 		return
 	}
 
-	query := `
+	row := DB.QueryRow(`
 	SELECT 
 		user_id_first 
 		FROM 
 			friends 
 		WHERE 
-			(user_id_first = ? AND user_id_second = ?) OR (user_id_second = ? AND user_id_first = ?)`
+			(user_id_first = ? AND user_id_second = ?) OR (user_id_second = ? AND user_id_first = ?)
+	`, frds.IDUserFirst, frds.IDUserSecond, frds.IDUserFirst, frds.IDUserSecond)
 
-	row := DB.QueryRow(query, frds.IDUserFirst, frds.IDUserSecond, frds.IDUserFirst, frds.IDUserSecond)
 	if row.Scan() != sql.ErrNoRows {
 		err = errors.New("they're already friends")
 		return
@@ -48,21 +48,21 @@ func AddFriend(frds Friend) (err error) {
 // DeleteFriend delete friendship of the "friends" table
 //  @param1 (frds): structure variable "Friend"
 //
-//  @return1 (err error): error variable
+//  @return1 (err): error variable
 func DeleteFriend(frds Friend) (err error) {
 	if frds.IDUserFirst == frds.IDUserSecond {
 		err = errors.New("that's your id user")
 		return
 	}
 
-	query := `
+	row, err := DB.Exec(`
 	DELETE  
 		FROM 
 			friends 
 		WHERE 
-			(user_id_first = ? AND user_id_second = ?) OR (user_id_second = ? AND user_id_first = ?)`
+			(user_id_first = ? AND user_id_second = ?) OR (user_id_second = ? AND user_id_first = ?)
+	`, frds.IDUserFirst, frds.IDUserSecond, frds.IDUserFirst, frds.IDUserSecond)
 
-	row, err := DB.Exec(query, frds.IDUserFirst, frds.IDUserSecond, frds.IDUserFirst, frds.IDUserSecond)
 	if err != nil {
 		return
 	}
@@ -83,8 +83,8 @@ func DeleteFriend(frds Friend) (err error) {
 // GetFriendsByIDUser get friends of user
 //  @param1 (id): id of user
 //
-//  @return1 (frds []Friend): friends slice
-//  @return2 (err error): error variable
+//  @return1 (frds): friends slice
+//  @return2 (err): error variable
 func GetFriendsByIDUser(id int) (frds []Friend, err error) {
 	query := `
 	SELECT 

@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/sandjuarezg/sqlite-social-network/models"
 )
 
@@ -54,20 +52,20 @@ func main() {
 
 			var back bool
 
-			email, err := models.PrintMessageWithResponseScan("Enter email")
+			username, err := models.PrintMessageWithResponseScan("Enter username")
 			if err != nil {
 				log.Println(err)
 				continue
 			}
 
 			fmt.Println()
-			passwd, err := models.PrintMessageWithResponseScan("Enter password")
+			password, err := models.PrintMessageWithResponseScan("Enter password")
 			if err != nil {
 				log.Println(err)
 				continue
 			}
 
-			user, err := models.LogIn(email, passwd)
+			user, err := models.LogIn(username, password)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -304,18 +302,6 @@ func main() {
 
 		case 2:
 
-			email, err := models.PrintMessageWithResponseScan("Enter email")
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-
-			if !strings.Contains(email, "@") {
-				log.Println("it isn't an email address")
-				continue
-			}
-
-			fmt.Println()
 			username, err := models.PrintMessageWithResponseScan("Enter username")
 			if err != nil {
 				log.Println(err)
@@ -323,13 +309,13 @@ func main() {
 			}
 
 			fmt.Println()
-			passwd, err := models.PrintMessageWithResponseScan("Enter password")
+			password, err := models.PrintMessageWithResponseScan("Enter password")
 			if err != nil {
 				log.Println(err)
 				continue
 			}
 
-			err = models.AddUser(models.User{Email: email, Username: username, Password: passwd})
+			err = models.AddUser(models.User{Username: username, Password: password})
 			if err != nil {
 				log.Println(err)
 				continue

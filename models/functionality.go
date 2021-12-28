@@ -16,7 +16,6 @@ import (
 // DB global database variable
 var DB *sql.DB
 
-// init
 func init() {
 	err := ReviewSQLMigration()
 	if err != nil {
@@ -31,7 +30,7 @@ func init() {
 
 // CleanConsole clear console after 1 second
 //
-//  @return1 (err error): error variable
+//  @return1 (err): error variable
 func CleanConsole() (err error) {
 	time.Sleep(1 * time.Second)
 
@@ -49,8 +48,8 @@ func CleanConsole() (err error) {
 // PrintMessageWithResponseScan print message and scan response
 //  @param1 (msg): message to display by console
 //
-//  @return1 (rspns string): response of user
-//  @return2 (err error): error variable
+//  @return1 (rspns): response of user
+//  @return2 (err): error variable
 func PrintMessageWithResponseScan(msg string) (rspns string, err error) {
 	fmt.Println(msg)
 	aux, _, err := bufio.NewReader(os.Stdin).ReadLine()
@@ -64,7 +63,7 @@ func PrintMessageWithResponseScan(msg string) (rspns string, err error) {
 
 // ReviewSqlMigration migration review
 //
-//  @return1 (err error):  error variable
+//  @return1 (err):  error variable
 func ReviewSQLMigration() (err error) {
 	_, err = os.Stat("./migration.sql")
 	if err != nil {

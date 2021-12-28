@@ -11,19 +11,18 @@ import (
 // User structure for User
 type User struct {
 	ID       int    // id of user
-	Email    string // email of user
 	Username string // username of user
 	Password string // password of user
 }
 
 // AddUser add user of the "users" table
 //  @param1 (user): structure variable "User"
-
-//  @return1 (err error): error variable
+//
+//  @return1 (err): error variable
 func AddUser(user User) (err error) {
-	_, err = DB.Exec("INSERT INTO users (email, username, passwd) VALUES (?, ?, ?)", user.Email, user.Username, user.Password)
+	_, err = DB.Exec("INSERT INTO users (username, password) VALUES (?, ?)", user.Username, user.Password)
 	if err != nil {
-		err = errors.New("error: probably email already use")
+		err = errors.New("error: probably username already use")
 		return
 	}
 
@@ -31,14 +30,14 @@ func AddUser(user User) (err error) {
 }
 
 // LogIn user login
-//  @param1 (email): email of user
-//  @param2 (passwd): password of user
+//  @param1 (username): username of user
+//  @param2 (password): password of user
 //
-//  @return1 (user User): structure variable "User"
-//  @return2 (err error): error variable
-func LogIn(email, passwd string) (user User, err error) {
-	row := DB.QueryRow("SELECT id, email, username, passwd FROM users WHERE email = ? AND passwd = ?", email, passwd)
-	err = row.Scan(&user.ID, &user.Email, &user.Username, &user.Password)
+//  @return1 (user): structure variable "User"
+//  @return2 (err): error variable
+func LogIn(username, password string) (user User, err error) {
+	row := DB.QueryRow("SELECT id, username, password FROM users WHERE username = ? AND password = ?", username, password)
+	err = row.Scan(&user.ID, &user.Username, &user.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			err = errors.New("User not found")
@@ -52,7 +51,7 @@ func LogIn(email, passwd string) (user User, err error) {
 // DeleteAccount delete account of user
 //  @rcvr1 (user): structure variable "User"
 //
-//  @return1 (err error): error variable
+//  @return1 (err): error variable
 func (user User) DeleteAccount() (err error) {
 	row, err := DB.Exec("DELETE from users WHERE id = ?", user.ID)
 	if err != nil {
@@ -75,8 +74,8 @@ func (user User) DeleteAccount() (err error) {
 // GetSimilarUsersByUsername get similar usernames by username
 //  @param1 (username): username
 //
-//  @return1 (users []User): user slice
-//  @return2 (err error): error variable
+//  @return1 (users): user slice
+//  @return2 (err): error variable
 func GetSimilarUsersByUsername(username string) (users []User, err error) {
 	rows, err := DB.Query("SELECT id, username FROM users WHERE username LIKE ? ORDER BY id", fmt.Sprintf("%%%s%%", username))
 	if err != nil {
@@ -101,8 +100,8 @@ func GetSimilarUsersByUsername(username string) (users []User, err error) {
 // GetUsernameByUserID get username by id
 //  @param1 (id): user id
 //
-//  @return1 (username string): username
-//  @return2 (err error): error variable
+//  @return1 (username): username
+//  @return2 (err): error variable
 func GetUsernameByUserID(id int) (username string, err error) {
 	row := DB.QueryRow("SELECT username FROM users WHERE id = ?", id)
 	err = row.Scan(&username)
