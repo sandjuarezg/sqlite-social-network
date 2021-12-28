@@ -6,15 +6,15 @@ import (
 	"time"
 )
 
-// Friend: structure for friends
+// Friend structure for friends
 type Friend struct {
 	IDUserFirst  int       // id of first user
 	IDUserSecond int       // id of second user
 	Date         time.Time // friendship start date
 }
 
-// AddFriend: add friendship in the "friends" table
-//  @param1 (frds Friend): structure variable "Friend"
+// AddFriend add friendship in the "friends" table
+//  @param1 (frds): structure variable "Friend"
 //
 //  @return1 (err error): error variable
 func AddFriend(frds Friend) (err error) {
@@ -23,19 +23,21 @@ func AddFriend(frds Friend) (err error) {
 		return
 	}
 
-	if frds.IDUserFirst > frds.IDUserSecond {
-		aux := frds.IDUserFirst
-		frds.IDUserFirst = frds.IDUserSecond
-		frds.IDUserSecond = aux
-	}
+	query := `
+	SELECT 
+		user_id_first 
+		FROM 
+			friends 
+		WHERE 
+			(user_id_first = ? AND user_id_second = ?) OR (user_id_second = ? AND user_id_first = ?)`
 
-	row := DB.QueryRow("SELECT IDUserFirst FROM friends WHERE id_user_first = ? AND id_user_second = ?", frds.IDUserFirst, frds.IDUserSecond)
+	row := DB.QueryRow(query, frds.IDUserFirst, frds.IDUserSecond, frds.IDUserFirst, frds.IDUserSecond)
 	if row.Scan() != sql.ErrNoRows {
 		err = errors.New("they're already friends")
 		return
 	}
 
-	_, err = DB.Exec("INSERT INTO friends (id_user_first, id_user_second, date) VALUES (?, ?, ?)", frds.IDUserFirst, frds.IDUserSecond, time.Now().Format(time.RFC3339))
+	_, err = DB.Exec("INSERT INTO friends (user_id_first, user_id_second, date) VALUES (?, ?, ?)", frds.IDUserFirst, frds.IDUserSecond, time.Now().Format(time.RFC3339))
 	if err != nil {
 		return
 	}
@@ -43,8 +45,8 @@ func AddFriend(frds Friend) (err error) {
 	return
 }
 
-// DeleteFriend: delete friendship of the "friends" table
-//  @param1 (frds Friend): structure variable "Friend"
+// DeleteFriend delete friendship of the "friends" table
+//  @param1 (frds): structure variable "Friend"
 //
 //  @return1 (err error): error variable
 func DeleteFriend(frds Friend) (err error) {
@@ -53,13 +55,14 @@ func DeleteFriend(frds Friend) (err error) {
 		return
 	}
 
-	if frds.IDUserFirst > frds.IDUserSecond {
-		aux := frds.IDUserFirst
-		frds.IDUserFirst = frds.IDUserSecond
-		frds.IDUserSecond = aux
-	}
+	query := `
+	DELETE  
+		FROM 
+			friends 
+		WHERE 
+			(user_id_first = ? AND user_id_second = ?) OR (user_id_second = ? AND user_id_first = ?)`
 
-	row, err := DB.Exec("DELETE from friends WHERE id_user_first = ? and id_user_second = ?", frds.IDUserFirst, frds.IDUserSecond)
+	row, err := DB.Exec(query, frds.IDUserFirst, frds.IDUserSecond, frds.IDUserFirst, frds.IDUserSecond)
 	if err != nil {
 		return
 	}
@@ -77,28 +80,28 @@ func DeleteFriend(frds Friend) (err error) {
 	return
 }
 
-// GetFriendsByIdUser: get friends of user
-//  @param1 (id int): id of user
+// GetFriendsByIDUser get friends of user
+//  @param1 (id): id of user
 //
 //  @return1 (frds []Friend): friends slice
 //  @return2 (err error): error variable
-func GetFriendsByIdUser(id int) (frds []Friend, err error) {
+func GetFriendsByIDUser(id int) (frds []Friend, err error) {
 	query := `
 	SELECT 
-		friends.date, friends.id_user_first
+		friends.date, friends.user_id_first
 		FROM 
 			friends
-		JOIN users AS uU ON uU.id = friends.id_user_first
+		JOIN users AS uU ON uU.id = friends.user_id_first
 		WHERE 
-			friends.id_user_second = ?
+			friends.user_id_second = ?
 	UNION ALL
 	SELECT 
-		friends.date, friends.id_user_second
+		friends.date, friends.user_id_second
 		FROM 
 			friends
-		JOIN users AS uF ON uF.id = friends.id_user_second
+		JOIN users AS uF ON uF.id = friends.user_id_second
 		WHERE 
-			friends.id_user_first = ?
+			friends.user_id_first = ?
 	`
 
 	rows, err := DB.Query(query, id, id)
