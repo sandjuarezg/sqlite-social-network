@@ -6,20 +6,20 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// Post: structure for posts
+// Post structure for posts
 type Post struct {
-	Id     int       // id of post
+	ID     int       // id of post
 	IDUser int       // id of user
 	Text   string    // text of post
 	Date   time.Time // date of post
 }
 
-// AddPost: add post of the "posts" table
-//  @param1 (p Post): structure variable "Post"
+// AddPost add post of the "posts" table
+//  @param1 (post): structure variable "Post"
 //
 //  @return1 (err error): error variable
-func AddPost(p Post) (err error) {
-	_, err = DB.Exec("INSERT INTO posts (id_user, text, date) VALUES (?, ?, ?)", p.IDUser, p.Text, time.Now().Format(time.RFC3339))
+func AddPost(post Post) (err error) {
+	_, err = DB.Exec("INSERT INTO posts (user_id, text, date) VALUES (?, ?, ?)", post.IDUser, post.Text, time.Now().Format(time.RFC3339))
 	if err != nil {
 		return
 	}
@@ -27,13 +27,13 @@ func AddPost(p Post) (err error) {
 	return
 }
 
-// GetPostsByUserId: get posts of user
-//  @param1 (id int): id of user
+// GetPostsByUserID get posts of user
+//  @param1 (id): id of user
 //
-//  @return1 (p []Post): post slice
+//  @return1 (posts []Post): post slice
 //  @return2 (err error): error variable
-func GetPostsByUserId(id int) (p []Post, err error) {
-	rows, err := DB.Query("SELECT date, text FROM posts WHERE id_user = ? ORDER BY date DESC", id)
+func GetPostsByUserID(id int) (posts []Post, err error) {
+	rows, err := DB.Query("SELECT date, text FROM posts WHERE user_id = ? ORDER BY date DESC", id)
 	if err != nil {
 		return
 	}
@@ -55,7 +55,7 @@ func GetPostsByUserId(id int) (p []Post, err error) {
 			return
 		}
 
-		p = append(p, aux)
+		posts = append(posts, aux)
 	}
 
 	return
