@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"time"
@@ -12,10 +13,23 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// global database variable
+// DB global database variable
 var DB *sql.DB
 
-// CleanConsole: clear console after 1 second
+// init
+func init() {
+	err := ReviewSQLMigration()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	DB, err = sql.Open("sqlite3", "./social_network.db?_foreign_keys=ON")
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// CleanConsole clear console after 1 second
 //
 //  @return1 (err error): error variable
 func CleanConsole() (err error) {
@@ -32,8 +46,8 @@ func CleanConsole() (err error) {
 	return
 }
 
-// PrintMessageWithResponseScan: print message and scan response
-//  @param1 (msg string): message to display by console
+// PrintMessageWithResponseScan print message and scan response
+//  @param1 (msg): message to display by console
 //
 //  @return1 (rspns string): response of user
 //  @return2 (err error): error variable
@@ -48,29 +62,27 @@ func PrintMessageWithResponseScan(msg string) (rspns string, err error) {
 	return
 }
 
-// ReviewSqlMigration: migration review
+// ReviewSqlMigration migration review
 //
-//  @return1 (err):  error variable
+//  @return1 (err error):  error variable
 func ReviewSQLMigration() (err error) {
 	_, err = os.Stat("./migration.sql")
 	if err != nil {
-		if !os.IsNotExist(err) {
-			return
+		if os.IsNotExist(err) {
+			err = errors.New("migration file not found")
 		}
-
-		err = errors.New("migration file not found")
 		return
 	}
 
 	_, err = os.Stat("./social_network.db")
 	if err != nil {
-		if !os.IsNotExist(err) {
-			return
-		}
-
-		_, err = os.Create("./social_network.db")
-		if err != nil {
-			err = errors.New("error to create database")
+		if os.IsNotExist(err) {
+			_, err = os.Create("./social_network.db")
+			if err != nil {
+				err = errors.New("error to create database")
+				return
+			}
+		} else {
 			return
 		}
 	}
@@ -82,7 +94,7 @@ func ReviewSQLMigration() (err error) {
 	}
 	defer db.Close()
 
-	_, err = db.Query("SELECT users.id, posts.id, friends.id_user_first, requests.id_user_first FROM users, posts, friends, requests")
+	_, err = db.Query("SELECT users.id, posts.id, friends.user_id_first, requests.user_id_first FROM users, posts, friends, requests")
 	if err != nil {
 		var content []byte
 
