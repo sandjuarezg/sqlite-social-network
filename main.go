@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"strconv"
@@ -10,18 +9,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/sandjuarezg/sqlite-social-network/models"
 )
-
-func init() {
-	err := models.ReviewSQLMigration()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	models.DB, err = sql.Open("sqlite3", "./social_network.db?_foreign_keys=ON")
-	if err != nil {
-		log.Fatal(err)
-	}
-}
 
 func main() {
 	defer models.DB.Close()
@@ -80,7 +67,7 @@ func main() {
 				continue
 			}
 
-			u, err := models.LogIn(email, passwd)
+			user, err := models.LogIn(email, passwd)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -95,7 +82,7 @@ func main() {
 				}
 
 				opc = 0
-				fmt.Printf("~ Welcome %s ~\n", u.Username)
+				fmt.Printf("~ Welcome %s ~\n", user.Username)
 				fmt.Println("0. Sign off")
 				fmt.Println("1. Delete account")
 				fmt.Println("-------------------")
@@ -137,7 +124,7 @@ func main() {
 
 					back = true
 
-					err = u.DeleteAccount()
+					err = user.DeleteAccount()
 					if err != nil {
 						log.Println(err)
 						continue
@@ -154,7 +141,7 @@ func main() {
 						continue
 					}
 
-					err = models.AddPost(models.Post{IDUser: u.Id, Text: text})
+					err = models.AddPost(models.Post{IDUser: user.ID, Text: text})
 					if err != nil {
 						log.Println(err)
 						continue
@@ -179,7 +166,7 @@ func main() {
 
 					fmt.Println()
 					for _, v := range us {
-						fmt.Printf("%d. %s\n", v.Id, v.Username)
+						fmt.Printf("%d. %s\n", v.ID, v.Username)
 					}
 
 					var id int
@@ -187,7 +174,7 @@ func main() {
 					fmt.Println("Enter user id to add")
 					fmt.Scanln(&id)
 
-					err = models.SendFriendRequest(models.Request{IDUserFirst: u.Id, IDUserSecond: id})
+					err = models.SendFriendRequest(models.Request{IDUserFirst: user.ID, IDUserSecond: id})
 					if err != nil {
 						log.Println(err)
 						continue
@@ -210,7 +197,7 @@ func main() {
 						continue
 					}
 
-					err = models.DeleteFriend(models.Friend{IDUserFirst: u.Id, IDUserSecond: n})
+					err = models.DeleteFriend(models.Friend{IDUserFirst: user.ID, IDUserSecond: n})
 					if err != nil {
 						log.Println(err)
 						continue
@@ -221,7 +208,7 @@ func main() {
 
 				case 5:
 
-					posts, err := models.GetPostsByUserId(u.Id)
+					posts, err := models.GetPostsByUserID(user.ID)
 					if err != nil {
 						log.Println(err)
 						continue
@@ -244,7 +231,7 @@ func main() {
 
 				case 6:
 
-					friends, err := models.GetFriendsByIdUser(u.Id)
+					friends, err := models.GetFriendsByIDUser(user.ID)
 					if err != nil {
 						log.Println(err)
 						continue
@@ -256,7 +243,7 @@ func main() {
 					}
 
 					for _, v := range friends {
-						username, err := models.GetUsernameByUserId(v.IDUserFirst)
+						username, err := models.GetUsernameByUserID(v.IDUserFirst)
 						if err != nil {
 							log.Println(err)
 							return
@@ -271,7 +258,7 @@ func main() {
 
 				case 7:
 
-					requests, err := models.GetRequestsByIdUser(u.Id)
+					requests, err := models.GetRequestsByIDUser(user.ID)
 					if err != nil {
 						log.Println(err)
 						continue
@@ -284,7 +271,7 @@ func main() {
 
 					fmt.Println("Enter id of user")
 					for _, v := range requests {
-						username, err := models.GetUsernameByUserId(v.IDUserFirst)
+						username, err := models.GetUsernameByUserID(v.IDUserFirst)
 						if err != nil {
 							log.Println(err)
 							return
@@ -306,7 +293,7 @@ func main() {
 						ban = true
 					}
 
-					err = models.AnswerRequest(models.Request{IDUserFirst: u.Id, IDUserSecond: opc}, ban)
+					err = models.AnswerRequest(models.Request{IDUserFirst: user.ID, IDUserSecond: opc}, ban)
 					if err != nil {
 						log.Println(err)
 						continue
@@ -342,7 +329,7 @@ func main() {
 				continue
 			}
 
-			err = models.AddUser(models.User{Email: email, Username: username, Passwd: passwd})
+			err = models.AddUser(models.User{Email: email, Username: username, Password: passwd})
 			if err != nil {
 				log.Println(err)
 				continue
