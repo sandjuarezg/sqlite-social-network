@@ -86,25 +86,20 @@ func DeleteFriend(frds Friend) (err error) {
 //  @return1 (frds): friends slice
 //  @return2 (err): error variable
 func GetFriendsByIDUser(id int) (frds []Friend, err error) {
-	query := `
-	SELECT 
-		friends.date, friends.user_id_first
-		FROM 
+	rows, err := DB.Query(`
+	SELECT
+		friends.date,
+		CASE
+			WHEN friends.user_id_first = ? THEN
+				friends.user_id_second
+			ELSE
+				friends.user_id_first
+			END AS friends
+		FROM
 			friends
-		JOIN users AS uU ON uU.id = friends.user_id_first
 		WHERE 
-			friends.user_id_second = ?
-	UNION ALL
-	SELECT 
-		friends.date, friends.user_id_second
-		FROM 
-			friends
-		JOIN users AS uF ON uF.id = friends.user_id_second
-		WHERE 
-			friends.user_id_first = ?
-	`
-
-	rows, err := DB.Query(query, id, id)
+			friends.user_id_first = ? OR friends.user_id_second = ?
+	`, id, id, id)
 	if err != nil {
 		return
 	}
