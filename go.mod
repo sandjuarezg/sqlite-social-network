@@ -1,4 +1,4 @@
-module github.com/sand/sqlite-social-network
+module github.com/sandjuarezg/sqlite-social-network
 
 go 1.17
 
