@@ -1,2 +1,5 @@
-github.com/mattn/go-sqlite3 v1.14.9 h1:10HX2Td0ocZpYEjhilsuo6WWtUqttj2Kb0KtD86/KYA=
 github.com/mattn/go-sqlite3 v1.14.9/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
+github.com/mattn/go-sqlite3 v1.14.10 h1:MLn+5bFRlWMGoSRmJour3CL1w/qL96mvipqpwQW/Sfk=
+github.com/mattn/go-sqlite3 v1.14.10/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
+github.com/sandjuarezg/sqlite-social-network v0.0.0-20211228070944-3db15e62f74e h1:QB/7TOaRo6YKBOaF8b8AbLl5FYAaGVbs9eTV5rEOZj8=
+github.com/sandjuarezg/sqlite-social-network v0.0.0-20211228070944-3db15e62f74e/go.mod h1:pFnBTOya4HCvFXumJ+XJjoU3EqkilIB0nl+ss6XqF8A=
