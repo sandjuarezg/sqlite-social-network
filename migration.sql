@@ -1,15 +1,15 @@
 -- creates
 CREATE TABLE IF NOT EXISTS users (
-    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,   
     password TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS posts (
-    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
-    text TEXT NOT NULL,
-	date TEXT NOT NULL,
+    text TEXT,
+	date TEXT,
 
     FOREIGN KEY (user_id) 
         REFERENCES users (id)
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS posts (
 CREATE TABLE IF NOT EXISTS friends (
     user_id_first INTEGER NOT NULL,
 	user_id_second INTEGER NOT NULL,
-	date TEXT NOT NULL,
+	date TEXT,
 
     FOREIGN KEY (user_id_first) 
         REFERENCES users (id)
