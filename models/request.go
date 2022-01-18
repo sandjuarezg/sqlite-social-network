@@ -3,7 +3,6 @@ package models
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 )
 
 // Request structure for requests
@@ -112,8 +111,6 @@ func GetRequestsByIDUser(id int) (req []Request, err error) {
 
 		req = append(req, aux)
 	}
-
-	fmt.Println(req)
 
 	return
 }

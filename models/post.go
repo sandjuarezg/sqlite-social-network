@@ -20,7 +20,7 @@ type Post struct {
 //
 //  @return1 (err): error variable
 func AddPost(post Post) (err error) {
-	_, err = DB.Exec("INSERT INTO posts (user_id, text) VALUES (?, ?, ?)", post.IDUser, post.Text)
+	_, err = DB.Exec("INSERT INTO posts (user_id, text) VALUES (?, ?)", post.IDUser, post.Text)
 	if err != nil {
 		return
 	}
