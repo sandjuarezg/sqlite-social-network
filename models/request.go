@@ -12,12 +12,6 @@ type Request struct {
 	IDUserSecond int // id of user who receives the request
 }
 
-// Aux request structure for Requests
-type AuxRequest struct {
-	IDUserFirst  sql.NullInt64 // id of user who sent the request
-	IDUserSecond sql.NullInt64 // id of user who receives the request
-}
-
 // SendFriendRequest register friend requests in the "request" table
 //  @param1 (req): structure variable "Request"
 //
@@ -108,21 +102,12 @@ func GetRequestsByIDUser(id int) (req []Request, err error) {
 	}
 	defer rows.Close()
 
-	var (
-		auxRequest AuxRequest
-		aux        Request
-	)
+	var aux Request
 
 	for rows.Next() {
-		err = rows.Scan(&auxRequest.IDUserFirst)
+		err = rows.Scan(&aux.IDUserFirst)
 		if err != nil {
 			return
-		}
-
-		aux.IDUserFirst = -1
-
-		if auxRequest.IDUserFirst.Valid {
-			aux.IDUserFirst = int(auxRequest.IDUserFirst.Int64)
 		}
 
 		req = append(req, aux)

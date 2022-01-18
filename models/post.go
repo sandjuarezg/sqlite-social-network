@@ -15,14 +15,6 @@ type Post struct {
 	Date   time.Time // date of post
 }
 
-// Aux post structure for posts
-type AuxPost struct {
-	ID     sql.NullInt64  // id of post
-	IDUser sql.NullInt64  // id of user
-	Text   sql.NullString // text of post
-	Date   sql.NullTime   // date of post
-}
-
 // AddPost add post of the "posts" table
 //  @param1 (post): structure variable "Post"
 //
@@ -43,9 +35,8 @@ func AddPost(post Post) (err error) {
 //  @return2 (err): error variable
 func GetPostsByUserID(id int) (posts []Post, err error) {
 	var (
-		auxPost AuxPost
-		aux     Post
-		date    sql.NullString
+		aux  Post
+		date sql.NullString
 	)
 
 	rows, err := DB.Query("SELECT date, text FROM posts WHERE user_id = ? ORDER BY date DESC", id)
@@ -55,7 +46,7 @@ func GetPostsByUserID(id int) (posts []Post, err error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		err = rows.Scan(&date, &auxPost.Text)
+		err = rows.Scan(&date, &aux.Text)
 		if err != nil {
 			return
 		}
@@ -70,12 +61,6 @@ func GetPostsByUserID(id int) (posts []Post, err error) {
 			if err != nil {
 				return
 			}
-		}
-
-		aux.Text = "NULL"
-
-		if auxPost.Text.Valid {
-			aux.Text = auxPost.Text.String
 		}
 
 		posts = append(posts, aux)

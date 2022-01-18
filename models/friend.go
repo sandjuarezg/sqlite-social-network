@@ -13,13 +13,6 @@ type Friend struct {
 	Date         time.Time // friendship start date
 }
 
-// Aux friend structure for friend
-type AuxFriend struct {
-	IDUserFirst  sql.NullInt64 // id of first user
-	IDUserSecond sql.NullInt64 // id of second user
-	Date         sql.NullTime  // friendship start date
-}
-
 // AddFriend add friendship in the "friends" table
 //  @param1 (frds): structure variable "Friend"
 //
@@ -113,13 +106,12 @@ func GetFriendsByIDUser(id int) (frds []Friend, err error) {
 	defer rows.Close()
 
 	var (
-		auxFriend AuxFriend
-		aux       Friend
-		date      sql.NullString
+		aux  Friend
+		date sql.NullString
 	)
 
 	for rows.Next() {
-		err = rows.Scan(&date, &auxFriend.IDUserFirst)
+		err = rows.Scan(&date, &aux.IDUserFirst)
 		if err != nil {
 			return
 		}
@@ -134,12 +126,6 @@ func GetFriendsByIDUser(id int) (frds []Friend, err error) {
 			if err != nil {
 				return
 			}
-		}
-
-		aux.IDUserFirst = -1
-
-		if auxFriend.IDUserFirst.Valid {
-			aux.IDUserFirst = int(auxFriend.IDUserFirst.Int64)
 		}
 
 		frds = append(frds, aux)

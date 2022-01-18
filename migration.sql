@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
-    text TEXT,
+    text TEXT NOT NULL,
 	date TEXT,
 
     FOREIGN KEY (user_id) 
