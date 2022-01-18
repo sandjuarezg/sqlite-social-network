@@ -3,12 +3,19 @@ package models
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 )
 
 // Request structure for requests
 type Request struct {
 	IDUserFirst  int // id of user who sent the request
 	IDUserSecond int // id of user who receives the request
+}
+
+// Aux request structure for Requests
+type AuxRequest struct {
+	IDUserFirst  sql.NullInt64 // id of user who sent the request
+	IDUserSecond sql.NullInt64 // id of user who receives the request
 }
 
 // SendFriendRequest register friend requests in the "request" table
@@ -21,22 +28,22 @@ func SendFriendRequest(req Request) (err error) {
 		return
 	}
 
-	row := DB.QueryRow(`
+	err = DB.QueryRow(`
 	SELECT 
 		user_id_first 
 		FROM 
 			friends 
 		WHERE 
 			(user_id_first = ? AND user_id_second = ?) OR (user_id_second = ? AND user_id_first = ?)
-	`, req.IDUserFirst, req.IDUserSecond, req.IDUserFirst, req.IDUserSecond)
+	`, req.IDUserFirst, req.IDUserSecond, req.IDUserFirst, req.IDUserSecond).Scan()
 
-	if row.Scan() != sql.ErrNoRows {
+	if err != sql.ErrNoRows {
 		err = errors.New("they're already friends")
 		return
 	}
 
-	row = DB.QueryRow("SELECT user_id_first FROM requests WHERE user_id_first = ? AND user_id_second = ?", req.IDUserFirst, req.IDUserSecond)
-	if row.Scan() != sql.ErrNoRows {
+	err = DB.QueryRow("SELECT user_id_first FROM requests WHERE user_id_first = ? AND user_id_second = ?", req.IDUserFirst, req.IDUserSecond).Scan()
+	if err != sql.ErrNoRows {
 		err = errors.New("this request has already been sent")
 		return
 	}
@@ -101,16 +108,27 @@ func GetRequestsByIDUser(id int) (req []Request, err error) {
 	}
 	defer rows.Close()
 
-	var aux Request
+	var (
+		auxRequest AuxRequest
+		aux        Request
+	)
 
 	for rows.Next() {
-		err = rows.Scan(&aux.IDUserFirst)
+		err = rows.Scan(&auxRequest.IDUserFirst)
 		if err != nil {
 			return
 		}
 
+		aux.IDUserFirst = -1
+
+		if auxRequest.IDUserFirst.Valid {
+			aux.IDUserFirst = int(auxRequest.IDUserFirst.Int64)
+		}
+
 		req = append(req, aux)
 	}
+
+	fmt.Println(req)
 
 	return
 }
