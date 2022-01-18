@@ -13,6 +13,13 @@ type Friend struct {
 	Date         time.Time // friendship start date
 }
 
+// Aux friend structure for friend
+type AuxFriend struct {
+	IDUserFirst  sql.NullInt64 // id of first user
+	IDUserSecond sql.NullInt64 // id of second user
+	Date         sql.NullTime  // friendship start date
+}
+
 // AddFriend add friendship in the "friends" table
 //  @param1 (frds): structure variable "Friend"
 //
@@ -23,16 +30,16 @@ func AddFriend(frds Friend) (err error) {
 		return
 	}
 
-	row := DB.QueryRow(`
+	err = DB.QueryRow(`
 	SELECT 
 		user_id_first 
 		FROM 
 			friends 
 		WHERE 
 			(user_id_first = ? AND user_id_second = ?) OR (user_id_second = ? AND user_id_first = ?)
-	`, frds.IDUserFirst, frds.IDUserSecond, frds.IDUserFirst, frds.IDUserSecond)
+	`, frds.IDUserFirst, frds.IDUserSecond, frds.IDUserFirst, frds.IDUserSecond).Scan()
 
-	if row.Scan() != sql.ErrNoRows {
+	if err != sql.ErrNoRows {
 		err = errors.New("they're already friends")
 		return
 	}
@@ -106,19 +113,33 @@ func GetFriendsByIDUser(id int) (frds []Friend, err error) {
 	defer rows.Close()
 
 	var (
-		aux     Friend
-		content string
+		auxFriend AuxFriend
+		aux       Friend
+		date      sql.NullString
 	)
 
 	for rows.Next() {
-		err = rows.Scan(&content, &aux.IDUserFirst)
+		err = rows.Scan(&date, &auxFriend.IDUserFirst)
 		if err != nil {
 			return
 		}
 
-		aux.Date, err = time.Parse(time.RFC3339, string(content))
+		aux.Date, err = time.Parse(time.RFC3339, "0000-01-01T00:00:00Z")
 		if err != nil {
 			return
+		}
+
+		if date.Valid {
+			aux.Date, err = time.Parse(time.RFC3339, date.String)
+			if err != nil {
+				return
+			}
+		}
+
+		aux.IDUserFirst = -1
+
+		if auxFriend.IDUserFirst.Valid {
+			aux.IDUserFirst = int(auxFriend.IDUserFirst.Int64)
 		}
 
 		frds = append(frds, aux)
