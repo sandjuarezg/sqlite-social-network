@@ -49,7 +49,6 @@ func LogIn(username, password string) (user User, err error) {
 }
 
 // DeleteAccount delete account of user
-//  @rcvr1 (user): structure variable "User"
 //
 //  @return1 (err): error variable
 func (user User) DeleteAccount() (err error) {
