@@ -15,6 +15,13 @@ type User struct {
 	Password string // password of user
 }
 
+// Aux user structure for User
+type AuxUser struct {
+	ID       sql.NullInt64  // id of user
+	Username sql.NullString // username of user
+	Password sql.NullString // password of user
+}
+
 // AddUser add user of the "users" table
 //  @param1 (user): structure variable "User"
 //
@@ -36,13 +43,30 @@ func AddUser(user User) (err error) {
 //  @return1 (user): structure variable "User"
 //  @return2 (err): error variable
 func LogIn(username, password string) (user User, err error) {
+	var auxUser AuxUser
+
 	row := DB.QueryRow("SELECT id, username, password FROM users WHERE username = ? AND password = ?", username, password)
-	err = row.Scan(&user.ID, &user.Username, &user.Password)
+	err = row.Scan(&auxUser.ID, &auxUser.Username, &auxUser.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			err = errors.New("User not found")
 		}
 		return
+	}
+
+	user.ID = -1
+	if auxUser.ID.Valid {
+		user.ID = int(auxUser.ID.Int64)
+	}
+
+	user.Username = "NULL"
+	if auxUser.Username.Valid {
+		user.Username = auxUser.Username.String
+	}
+
+	user.Password = "NULL"
+	if auxUser.Password.Valid {
+		user.Password = auxUser.Password.String
 	}
 
 	return
@@ -83,12 +107,25 @@ func GetSimilarUsersByUsername(username string) (users []User, err error) {
 	}
 	defer rows.Close()
 
-	var aux User
+	var (
+		aux     User
+		auxUser AuxUser
+	)
 
 	for rows.Next() {
-		err = rows.Scan(&aux.ID, &aux.Username)
+		err = rows.Scan(&auxUser.ID, &auxUser.Username)
 		if err != nil {
 			return
+		}
+
+		aux.ID = -1
+		if auxUser.ID.Valid {
+			aux.ID = int(auxUser.ID.Int64)
+		}
+
+		aux.Username = "NULL"
+		if auxUser.Username.Valid {
+			aux.Username = auxUser.Username.String
 		}
 
 		users = append(users, aux)
@@ -103,13 +140,20 @@ func GetSimilarUsersByUsername(username string) (users []User, err error) {
 //  @return1 (username): username
 //  @return2 (err): error variable
 func GetUsernameByUserID(id int) (username string, err error) {
-	row := DB.QueryRow("SELECT username FROM users WHERE id = ?", id)
-	err = row.Scan(&username)
+	var auxUser AuxUser
+
+	err = DB.QueryRow("SELECT username FROM users WHERE id = ?", id).Scan(&auxUser.Username)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			err = errors.New("User not found")
 		}
 		return
+	}
+
+	username = "NULL"
+
+	if auxUser.Username.Valid {
+		username = auxUser.Username.String
 	}
 
 	return
