@@ -37,7 +37,7 @@ func AddFriend(frds Friend) (err error) {
 		return
 	}
 
-	_, err = DB.Exec("INSERT INTO friends (user_id_first, user_id_second, created_at) VALUES (?, ?, ?)", frds.IDUserFirst, frds.IDUserSecond, time.Now().Format(time.RFC3339))
+	_, err = DB.Exec("INSERT INTO friends (user_id_first, user_id_second) VALUES (?, ?)", frds.IDUserFirst, frds.IDUserSecond)
 	if err != nil {
 		return
 	}
