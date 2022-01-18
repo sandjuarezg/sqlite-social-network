@@ -9,10 +9,10 @@ import (
 
 // Post structure for posts
 type Post struct {
-	ID     int       // id of post
-	IDUser int       // id of user
-	Text   string    // text of post
-	Date   time.Time // date of post
+	ID        int       // id of post
+	IDUser    int       // id of user
+	Text      string    // text of post
+	CreatedAt time.Time // post creation date
 }
 
 // AddPost add post of the "posts" table
@@ -20,7 +20,7 @@ type Post struct {
 //
 //  @return1 (err): error variable
 func AddPost(post Post) (err error) {
-	_, err = DB.Exec("INSERT INTO posts (user_id, text, date) VALUES (?, ?, ?)", post.IDUser, post.Text, time.Now().Format(time.RFC3339))
+	_, err = DB.Exec("INSERT INTO posts (user_id, text) VALUES (?, ?, ?)", post.IDUser, post.Text)
 	if err != nil {
 		return
 	}
@@ -36,31 +36,30 @@ func AddPost(post Post) (err error) {
 func GetPostsByUserID(id int) (posts []Post, err error) {
 	var (
 		aux  Post
-		date sql.NullString
+		date string
+		text sql.NullString
 	)
 
-	rows, err := DB.Query("SELECT date, text FROM posts WHERE user_id = ? ORDER BY date DESC", id)
+	rows, err := DB.Query("SELECT created_at, text FROM posts WHERE user_id = ? ORDER BY created_at DESC", id)
 	if err != nil {
 		return
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		err = rows.Scan(&date, &aux.Text)
+		err = rows.Scan(&date, &text)
 		if err != nil {
 			return
 		}
 
-		aux.Date, err = time.Parse(time.RFC3339, "0000-01-01T00:00:00Z")
+		aux.CreatedAt, err = time.Parse(time.RFC3339, date)
 		if err != nil {
 			return
+
 		}
 
-		if date.Valid {
-			aux.Date, err = time.Parse(time.RFC3339, date.String)
-			if err != nil {
-				return
-			}
+		if text.Valid {
+			aux.Text = text.String
 		}
 
 		posts = append(posts, aux)

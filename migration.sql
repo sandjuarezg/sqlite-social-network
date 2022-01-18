@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS posts (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
-    text TEXT NOT NULL,
-	date TEXT,
+    text TEXT,
+	created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 
     FOREIGN KEY (user_id) 
         REFERENCES users (id)
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS posts (
 CREATE TABLE IF NOT EXISTS friends (
     user_id_first INTEGER NOT NULL,
 	user_id_second INTEGER NOT NULL,
-	date TEXT,
+	created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 
     FOREIGN KEY (user_id_first) 
         REFERENCES users (id)

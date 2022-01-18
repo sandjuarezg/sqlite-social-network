@@ -10,7 +10,7 @@ import (
 type Friend struct {
 	IDUserFirst  int       // id of first user
 	IDUserSecond int       // id of second user
-	Date         time.Time // friendship start date
+	CreatedAt    time.Time // friendship start date
 }
 
 // AddFriend add friendship in the "friends" table
@@ -37,7 +37,7 @@ func AddFriend(frds Friend) (err error) {
 		return
 	}
 
-	_, err = DB.Exec("INSERT INTO friends (user_id_first, user_id_second, date) VALUES (?, ?, ?)", frds.IDUserFirst, frds.IDUserSecond, time.Now().Format(time.RFC3339))
+	_, err = DB.Exec("INSERT INTO friends (user_id_first, user_id_second, created_at) VALUES (?, ?, ?)", frds.IDUserFirst, frds.IDUserSecond, time.Now().Format(time.RFC3339))
 	if err != nil {
 		return
 	}
@@ -88,7 +88,7 @@ func DeleteFriend(frds Friend) (err error) {
 func GetFriendsByIDUser(id int) (frds []Friend, err error) {
 	rows, err := DB.Query(`
 	SELECT
-		friends.date,
+		friends.created_at,
 		CASE
 			WHEN friends.user_id_first = ? THEN
 				friends.user_id_second
@@ -106,8 +106,8 @@ func GetFriendsByIDUser(id int) (frds []Friend, err error) {
 	defer rows.Close()
 
 	var (
+		date string
 		aux  Friend
-		date sql.NullString
 	)
 
 	for rows.Next() {
@@ -116,16 +116,9 @@ func GetFriendsByIDUser(id int) (frds []Friend, err error) {
 			return
 		}
 
-		aux.Date, err = time.Parse(time.RFC3339, "0000-01-01T00:00:00Z")
+		aux.CreatedAt, err = time.Parse(time.RFC3339, date)
 		if err != nil {
 			return
-		}
-
-		if date.Valid {
-			aux.Date, err = time.Parse(time.RFC3339, date.String)
-			if err != nil {
-				return
-			}
 		}
 
 		frds = append(frds, aux)

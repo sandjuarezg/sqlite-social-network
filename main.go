@@ -220,7 +220,7 @@ func main() {
 					fmt.Println("Your posts")
 					fmt.Println()
 					for _, v := range posts {
-						fmt.Printf("%s - %s\n", v.Date, v.Text)
+						fmt.Printf("%s - %s\n", v.CreatedAt, v.Text)
 					}
 
 					fmt.Println()
@@ -247,7 +247,7 @@ func main() {
 							return
 						}
 
-						fmt.Printf("You and %s are friends since %s\n", username, v.Date)
+						fmt.Printf("You and %s are friends since %s\n", username, v.CreatedAt)
 					}
 
 					fmt.Println()
